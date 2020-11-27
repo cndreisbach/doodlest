@@ -1,10 +1,10 @@
-/* globals Path, Tool, Point, view, project */
+/* globals Path, Tool, Point, view */
 
 // Import dependencies
 import paper, { project } from 'paper'
-import Baobab from 'baobab'
 import { el, mount } from 'redom'
 import Mousetrap from 'mousetrap'
+import { selectPenColor, selectPenSize, penState } from './stores'
 
 // Import CSS stylesheet
 import './assets/css/main.css'
@@ -13,27 +13,25 @@ document.title = 'Doodler'
 
 // State
 
-const state = new Baobab({
-  penSize: 3,
-  penColor: '#222200',
-  colorChoices: [
-    '#222200',
-    '#FB5012',
-    '#7A306C',
-    '#53917E',
-    '#E9DF00',
-    '#2081C3'
-  ]
-})
+const colorChoices = [
+  '#222200',
+  '#FB5012',
+  '#7A306C',
+  '#53917E',
+  '#E9DF00',
+  '#2081C3'
+]
 
 let lastPaths = []
 let undoIndex = 0
 
-const penColorCursor = state.select('penColor')
-penColorCursor.on('update', event => {
-  penCursor.fillColor = event.data.currentData
+selectPenColor.watch(color => {
+  penCursor.fillColor = color
 })
-window.penColorCursor = penColorCursor
+
+selectPenSize.watch(size => {
+  penCursor.radius = size
+})
 
 // Create a canvas and mount it
 const canvas = el('canvas#doodler', { resize: true })
@@ -44,19 +42,19 @@ paper.setup(canvas)
 paper.install(window)
 
 // Create color palette
-const colorBoard = el('.color-board', state.get('colorChoices').map(c => el('.color-selector', { style: { 'background-color': c }, 'data-color': c })))
+const colorBoard = el('.color-board', colorChoices.map(c => el('.color-selector', { style: { 'background-color': c }, 'data-color': c })))
 mount(document.body, colorBoard)
 
 colorBoard.addEventListener('click', event => {
   const newColor = event.target.dataset.color
-  penColorCursor.set(newColor)
+  selectPenColor(newColor)
 })
 
 // Create a cursor for the pen
 const penCursor = new Path.Circle({
   center: [0, 0],
-  radius: state.get('penSize'),
-  fillColor: penColorCursor.get(),
+  radius: penState.getState().size,
+  fillColor: penState.getState().color,
   strokeColor: 'black'
 })
 
@@ -70,7 +68,7 @@ penTool.onMouseDown = function (event) {
     lastPaths = lastPaths.slice(undoIndex)
     undoIndex = 0
   }
-  path = new Path({ strokeWidth: state.get('penSize'), strokeColor: penColorCursor.get() })
+  path = new Path({ strokeWidth: penState.getState().size, strokeColor: penState.getState().color })
   path.add(event.point)
 }
 
@@ -117,6 +115,9 @@ function clearCanvas () {
   lastPaths = []
   undoIndex = 0
 }
+
+selectPenColor('#220000')
+selectPenSize(3)
 
 Mousetrap.bind(['command+z', 'control+z'], undo)
 Mousetrap.bind(['command+shift+z', 'control+shift+z'], redo)

@@ -33,8 +33,7 @@
   },
   "dependencies": {
     "@babel/preset-env": "^7.12.7",
-    "baobab": "^2.6.0",
-    "immer": "^8.0.0",
+    "effector": "^21.7.5",
     "mousetrap": "^1.6.5",
     "paper": "^0.12.11",
     "redom": "^3.27.1"
