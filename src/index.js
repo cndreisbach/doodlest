@@ -1,7 +1,7 @@
 /* globals Path, Tool, Point, view, project */
 
 // Import dependencies
-import paper from 'paper'
+import paper, { project } from 'paper'
 import Baobab from 'baobab'
 import { el, mount } from 'redom'
 import Mousetrap from 'mousetrap'
@@ -112,5 +112,12 @@ function redo () {
   }
 }
 
+function clearCanvas () {
+  project.activeLayer.removeChildren()
+  lastPaths = []
+  undoIndex = 0
+}
+
 Mousetrap.bind(['command+z', 'control+z'], undo)
 Mousetrap.bind(['command+shift+z', 'control+shift+z'], redo)
+Mousetrap.bind('backspace', clearCanvas)
