@@ -1,8 +1,8 @@
-import { fabric } from 'fabric'
 import { el, mount } from 'redom'
-import { selectPenColor, $pen, addCanvasState, undoCanvasState, redoCanvasState, $undo, clearCanvas } from './stores'
+import { selectPenColor, addCanvasState, undoCanvasState, redoCanvasState, $undo, clearCanvas } from './stores'
 import { setupKeyBindings } from './keybindings'
 import './assets/css/main.css'
+import { createFabricCanvas } from './canvas'
 
 document.title = 'Doodlest'
 
@@ -10,45 +10,7 @@ document.title = 'Doodlest'
 const canvasEl = el('canvas#doodler')
 mount(document.body, canvasEl)
 
-// Set up fabric
-const canvas = new fabric.Canvas(canvasEl)
-
-function resizeCanvas () {
-  const htmlEl = document.querySelector('html')
-  canvas.setWidth(htmlEl.clientWidth)
-  canvas.setHeight(htmlEl.clientHeight)
-  canvas.calcOffset()
-}
-
-window.addEventListener('resize', resizeCanvas)
-resizeCanvas()
-canvas.setBackgroundColor('#FFF')
-
-// Set up free drawing
-canvas.isDrawingMode = true
-
-canvas.freeDrawingBrush = new fabric.PencilBrush(canvas)
-
-$pen.watch(state => {
-  canvas.freeDrawingBrush.width = state.size
-  canvas.freeDrawingBrush.color = state.color
-})
-
-let pauseSave = false
-
-canvas.on('object:added', () => {
-  if (!pauseSave) {
-    addCanvasState(canvas.toJSON())
-  }
-})
-
-canvas.on('object:modified', () => {
-  if (!pauseSave) {
-    addCanvasState(canvas.toJSON())
-  }
-})
-
-addCanvasState(canvas.toJSON())
+const canvas = createFabricCanvas(canvasEl)
 
 // Create color palette
 const colorChoices = [
@@ -73,7 +35,25 @@ colorBoard.addEventListener('click', event => {
 //   view.translate(new Point(0, -event.deltaY))
 // })
 
-// Undo/redo + keyboard
+// Undo / redo
+// pauseSave is used b/c when we reload the canvas from JSON, a bunch of object:added events
+// fire. We do not want to capture those events.
+let pauseSave = false
+
+canvas.on('object:added', () => {
+  if (!pauseSave) {
+    addCanvasState(canvas.toJSON())
+  }
+})
+
+canvas.on('object:modified', () => {
+  if (!pauseSave) {
+    addCanvasState(canvas.toJSON())
+  }
+})
+
+// Add initial (blank) state
+addCanvasState(canvas.toJSON())
 
 $undo.watch(undoCanvasState, state => {
   pauseSave = true
@@ -95,17 +75,18 @@ $undo.watch(redoCanvasState, state => {
 
 clearCanvas.watch(() => {
   canvas.clear()
+  // We add the state post-clearing so that we can undo the clear.
   addCanvasState(canvas.toJSON())
 })
 
+// Saving the canvas as SVG
+
 const electron = require('electron')
 
-function save () {
+function saveAsSVG () {
   electron.ipcRenderer.send('save-file', canvas.toSVG())
 }
 
-window.save = save
-
 // Keyboard
 
-setupKeyBindings({ save })
+setupKeyBindings({ save: saveAsSVG })
