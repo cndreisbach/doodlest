@@ -3,10 +3,12 @@ import { createStore, createEvent } from 'effector'
 export const selectPenColor = createEvent()
 export const incPenSize = createEvent()
 export const decPenSize = createEvent()
-export const addPath = createEvent()
-export const undoPath = createEvent()
-export const redoPath = createEvent()
+export const addCanvasState = createEvent()
+export const undoCanvasState = createEvent()
+export const redoCanvasState = createEvent()
 export const clearCanvas = createEvent()
+
+const MAX_UNDO = 10
 
 export const $pen = createStore({
   color: '#222200',
@@ -18,21 +20,21 @@ export const $pen = createStore({
 
 export const $undo = createStore({
   index: 0,
-  paths: []
+  canvasStates: []
 })
-  .on(addPath, (oldState, newPath) => {
-    const newPaths = oldState.paths.slice(oldState.index)
-    newPaths.unshift(newPath)
-    return { index: 0, paths: newPaths.slice(0, 10) }
+  .on(addCanvasState, (oldState, newCanvasState) => {
+    const newCanvasStates = oldState.canvasStates.slice(oldState.index)
+    newCanvasStates.unshift(newCanvasState)
+    return { index: 0, canvasStates: newCanvasStates.slice(0, MAX_UNDO) }
   })
-  .on(undoPath, (oldState) => (
-    { ...oldState, index: Math.min(oldState.index + 1, oldState.paths.length) }
+  .on(undoCanvasState, (oldState) => (
+    { ...oldState, index: Math.min(oldState.index + 1, oldState.canvasStates.length) }
   ))
-  .on(redoPath, (oldState) => {
+  .on(redoCanvasState, (oldState) => {
     if (oldState.index > 0) {
       return { ...oldState, index: oldState.index - 1 }
     } else {
       return oldState
     }
   })
-  .reset(clearCanvas)
+  // .reset(clearCanvas)
