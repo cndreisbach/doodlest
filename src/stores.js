@@ -1,5 +1,6 @@
 import { createStore, createEvent } from 'effector'
 
+export const setTool = createEvent()
 export const selectPenColor = createEvent()
 export const incPenSize = createEvent()
 export const decPenSize = createEvent()
@@ -9,6 +10,11 @@ export const redoCanvasState = createEvent()
 export const clearCanvas = createEvent()
 
 const MAX_UNDO = 10
+
+export const $tool = createStore('pencil')
+  .on(setTool, (state, payload) => payload)
+
+$tool.watch(tool => console.log({ tool }))
 
 export const $pen = createStore({
   color: '#222200',

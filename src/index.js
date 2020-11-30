@@ -1,10 +1,22 @@
 import { el, mount } from 'redom'
-import { selectPenColor, addCanvasState, undoCanvasState, redoCanvasState, $undo, clearCanvas } from './stores'
+import { selectPenColor, addCanvasState, undoCanvasState, redoCanvasState, $undo, clearCanvas, setTool } from './stores'
 import { setupKeyBindings } from './keybindings'
 import './assets/css/main.css'
+import './assets/icofont/icofont.css'
 import { createFabricCanvas } from './canvas'
 
 document.title = 'Doodlest'
+
+const controlsEl = el('.controls')
+const dragButton = el('button#drag', el('i.icofont-drag.icofont-2x'))
+controlsEl.appendChild(dragButton)
+const pencilButton = el('button#pencil', el('i.icofont-pencil-alt-2.icofont-2x'))
+pencilButton.addEventListener('click', () => setTool('pencil'))
+controlsEl.appendChild(pencilButton)
+const eraserButton = el('button#eraser', el('i.icofont-eraser.icofont-2x'))
+eraserButton.addEventListener('click', () => setTool('eraser'))
+controlsEl.appendChild(eraserButton)
+mount(document.body, controlsEl)
 
 // Create a canvas and mount it
 const canvasEl = el('canvas#doodler')
@@ -22,7 +34,7 @@ const colorChoices = [
   '#2081C3'
 ]
 
-const colorBoard = el('.color-board', colorChoices.map(c => el('.color-selector', { style: { 'background-color': c }, 'data-color': c })))
+const colorBoard = el('.color-board', colorChoices.map(c => el('button.color-selector', { style: { display: 'block', 'background-color': c }, 'data-color': c })))
 mount(document.body, colorBoard)
 
 colorBoard.addEventListener('click', event => {
