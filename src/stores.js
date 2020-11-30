@@ -4,6 +4,7 @@ export const setTool = createEvent()
 export const selectPenColor = createEvent()
 export const incPenSize = createEvent()
 export const decPenSize = createEvent()
+export const setPenSize = createEvent()
 export const addCanvasState = createEvent()
 export const undoCanvasState = createEvent()
 export const redoCanvasState = createEvent()
@@ -19,7 +20,7 @@ $tool.watch(tool => console.log({ tool }))
 
 export const $pen = createStore({
   color: '#222200',
-  size: 4
+  size: 2
 })
   .on(selectPenColor, (state, payload) => ({ ...state, color: payload }))
   .on(incPenSize, (state, payload) => ({ ...state, size: Math.min(64, state.size * 2) }))

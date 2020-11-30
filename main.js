@@ -106,7 +106,7 @@ ipcMain.on('save-file', (event, contents) => {
   // Resolves to a Promise<Object>
   dialog.showSaveDialog({
     title: 'Select the File Path to save',
-    defaultPath: path.join(__dirname, 'doodlest.svg'),
+    defaultPath: path.join(__dirname, 'scribblest.svg'),
     buttonLabel: 'Save',
     // Restricting the user to only Text Files.
     filters: [
@@ -120,10 +120,6 @@ ipcMain.on('save-file', (event, contents) => {
     console.log(file.canceled)
     if (!file.canceled) {
       console.log(file.filePath.toString())
-      // const data = contents.split(',')[1]
-      // const buffer = Buffer.from(data, 'base64')
-
-      // Creating and Writing to the sample.txt file
       fs.writeFile(file.filePath.toString(),
         contents, function (err) {
           if (err) throw err

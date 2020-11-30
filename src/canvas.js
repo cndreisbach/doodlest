@@ -25,6 +25,7 @@ export function createFabricCanvas (canvasEl) {
     pencil: new fabric.PencilBrush(canvas),
     eraser: new EraserBrush(canvas)
   }
+  brushes.pencil.decimate = 2
   brushes.eraser.width = 10
   brushes.eraser.color = '#FFFFFF'
 

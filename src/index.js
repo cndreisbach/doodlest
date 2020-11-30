@@ -5,7 +5,7 @@ import './assets/css/main.css'
 import './assets/icofont/icofont.css'
 import { createFabricCanvas } from './canvas'
 
-document.title = 'Doodlest'
+document.title = 'Scribblest'
 
 const controlsEl = el('.controls')
 const dragButton = el('button#drag', el('i.icofont-drag.icofont-2x'))
