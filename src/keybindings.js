@@ -1,11 +1,13 @@
 import Mousetrap from 'mousetrap'
-import { undoCanvasState, redoCanvasState, incPenSize, decPenSize, clearCanvas } from './stores'
+import { undoCanvasState, redoCanvasState, incPenSize, decPenSize, clearCanvas, useDrag } from './stores'
 
 export function setupKeyBindings ({ save }) {
-  Mousetrap.bind(['command+z', 'control+z'], undoCanvasState)
-  Mousetrap.bind(['command+shift+z', 'control+shift+z'], redoCanvasState)
+  Mousetrap.bind('mod+z', undoCanvasState)
+  Mousetrap.bind('mod+shift+z', redoCanvasState)
   Mousetrap.bind('backspace', clearCanvas)
-  Mousetrap.bind(['command+.', 'control+.'], incPenSize)
-  Mousetrap.bind(['command+,', 'control+,'], decPenSize)
-  Mousetrap.bind(['command+s', 'control+s'], save)
+  Mousetrap.bind('mod+.', incPenSize)
+  Mousetrap.bind('mod+,', decPenSize)
+  Mousetrap.bind('mod+s', save)
+  Mousetrap.bind('alt', () => useDrag(true), 'keydown')
+  Mousetrap.bind('alt', () => useDrag(false), 'keyup')
 }
