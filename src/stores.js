@@ -10,15 +10,16 @@ export const undoCanvasState = createEvent()
 export const redoCanvasState = createEvent()
 export const clearCanvas = createEvent()
 export const useDrag = createEvent()
+export const toggleDrawingMode = createEvent()
 
 const MAX_UNDO = 10
 
-export const $tool = createStore('pencil')
+export const toolStore = createStore('pencil')
   .on(setTool, (state, payload) => payload)
 
-$tool.watch(tool => console.log({ tool }))
+toolStore.watch(tool => console.log({ tool }))
 
-export const $pen = createStore({
+export const penStore = createStore({
   color: '#222200',
   size: 2
 })
@@ -26,7 +27,7 @@ export const $pen = createStore({
   .on(incPenSize, (state, payload) => ({ ...state, size: Math.min(64, state.size * 2) }))
   .on(decPenSize, (state, payload) => ({ ...state, size: Math.max(1, state.size / 2) }))
 
-export const $undo = createStore({
+export const undoStore = createStore({
   index: 0,
   canvasStates: []
 })
@@ -45,4 +46,3 @@ export const $undo = createStore({
       return oldState
     }
   })
-  // .reset(clearCanvas)

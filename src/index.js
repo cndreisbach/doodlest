@@ -1,9 +1,12 @@
 import { el, mount } from 'redom'
-import { selectPenColor, addCanvasState, undoCanvasState, redoCanvasState, $undo, clearCanvas, setTool } from './stores'
+import { selectPenColor, addCanvasState, undoCanvasState, redoCanvasState, undoStore, clearCanvas, setTool } from './stores'
 import { setupKeyBindings } from './keybindings'
 import './assets/css/main.css'
 import './assets/icofont/icofont.css'
 import { createFabricCanvas } from './canvas'
+import electron from 'electron'
+
+// Saving the canvas as SVG
 
 document.title = 'Scribblest'
 
@@ -62,7 +65,7 @@ canvas.on('object:modified', () => {
 // Add initial (blank) state
 addCanvasState(canvas.toJSON())
 
-$undo.watch(undoCanvasState, state => {
+undoStore.watch(undoCanvasState, state => {
   pauseSave = true
   const canvasState = state.canvasStates[state.index]
   if (canvasState) {
@@ -71,7 +74,7 @@ $undo.watch(undoCanvasState, state => {
   pauseSave = false
 })
 
-$undo.watch(redoCanvasState, state => {
+undoStore.watch(redoCanvasState, state => {
   pauseSave = true
   const canvasState = state.canvasStates[state.index]
   if (canvasState) {
@@ -85,10 +88,6 @@ clearCanvas.watch(() => {
   // We add the state post-clearing so that we can undo the clear.
   addCanvasState(canvas.toJSON())
 })
-
-// Saving the canvas as SVG
-
-const electron = require('electron')
 
 function saveAsSVG () {
   electron.ipcRenderer.send('save-file', canvas.toSVG())

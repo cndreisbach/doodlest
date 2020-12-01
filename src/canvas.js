@@ -1,7 +1,6 @@
 import { fabric } from 'fabric'
-import { $pen, $tool, useDrag } from './stores'
+import { penStore, toolStore, useDrag, toggleDrawingMode } from './stores'
 import { EraserBrush } from './eraser'
-import eraserIcon from './assets/icons/eraser.png'
 
 export function createFabricCanvas (canvasEl) {
   const canvas = new fabric.Canvas(canvasEl)
@@ -36,11 +35,11 @@ export function createFabricCanvas (canvasEl) {
   // TODO
   // Set size for eraser and pencil differently (or make same)
   // Allow for other tools
-  $pen.watch(state => {
+  penStore.watch(state => {
     brushes.pencil.width = state.size
     brushes.pencil.color = state.color
   })
-  $tool.watch(tool => {
+  toolStore.watch(tool => {
     canvas.freeDrawingBrush = brushes[tool]
     if (cursors[tool]) {
       console.log(cursors[tool])
@@ -64,6 +63,11 @@ export function createFabricCanvas (canvasEl) {
     }
   })
   addDragBehavior(canvas)
+
+  toggleDrawingMode.watch(mode => {
+    console.log({ drawingMode: mode })
+    canvas.isDrawingMode = mode
+  })
 
   return canvas
 }
