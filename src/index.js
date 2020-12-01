@@ -42,11 +42,6 @@ colorBoard.addEventListener('click', event => {
   selectPenColor(newColor)
 })
 
-// infinite scroll
-// window.addEventListener('wheel', function (event) {
-//   view.translate(new Point(0, -event.deltaY))
-// })
-
 // Undo / redo
 // pauseSave is used b/c when we reload the canvas from JSON, a bunch of object:added events
 // fire. We do not want to capture those events.
