@@ -22,13 +22,6 @@ function setupMenu (contents) {
     {
       label: 'File',
       submenu: [
-        {
-          label: 'Save',
-          role: 'save'
-        },
-        {
-          label: 'Save As...'
-        },
         { role: 'quit' }
       ]
     },
