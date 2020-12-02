@@ -14,7 +14,7 @@ export const toggleDrawingMode = createEvent()
 
 const MAX_UNDO = 10
 
-export const toolStore = createStore('pencil')
+export const toolStore = createStore('pen')
   .on(setTool, (state, payload) => payload)
 
 toolStore.watch(tool => console.log({ tool }))

@@ -2,9 +2,10 @@ import { fabric } from 'fabric'
 import { penStore, toolStore, useDrag, toggleDrawingMode } from './stores'
 import { EraserBrush } from './eraser'
 
-export function createFabricCanvas (canvasEl) {
+export function createCanvas (canvasEl) {
   const canvas = new fabric.Canvas(canvasEl)
 
+  // Whenever the window size changes, resize the canvas to fill the window
   function resizeCanvas () {
     const htmlEl = document.querySelector('html')
     canvas.setWidth(htmlEl.clientWidth)
@@ -14,42 +15,39 @@ export function createFabricCanvas (canvasEl) {
   }
 
   window.addEventListener('resize', resizeCanvas)
+  // Do an initial resize in order to make sure we start with a full-window
+  // canvas.
   resizeCanvas()
 
-  canvas.setBackgroundColor('#FFF')
+  // Set canvas background to white.
+  canvas.setBackgroundColor('#FFFFFF')
 
   // Set up free drawing
   canvas.isDrawingMode = true
   const brushes = {
-    pencil: new fabric.PencilBrush(canvas),
+    pen: new fabric.PencilBrush(canvas),
     eraser: new EraserBrush(canvas)
   }
-  brushes.pencil.decimate = 2
+  brushes.pen.decimate = 2
   brushes.eraser.width = 10
   brushes.eraser.color = '#FFFFFF'
 
-  canvas.freeDrawingBrush = brushes.pencil
-
-  const cursors = {}
+  // The initial drawing brush should be the pen.
+  canvas.freeDrawingBrush = brushes.pen
 
   // TODO
-  // Set size for eraser and pencil differently (or make same)
+  // Set size for eraser and pen differently (or make same)
   // Allow for other tools
   penStore.watch(state => {
-    brushes.pencil.width = state.size
-    brushes.pencil.color = state.color
+    brushes.pen.width = state.size
+    brushes.pen.color = state.color
   })
   toolStore.watch(tool => {
     canvas.freeDrawingBrush = brushes[tool]
-    if (cursors[tool]) {
-      console.log(cursors[tool])
-      canvas.freeDrawingCursor = cursors[tool]
-    } else {
-      canvas.freeDrawingCursor = 'crosshair'
-    }
   })
 
-  // Handle drag canvas
+  // Handle drag events for infinite canvas.
+  // See addDragBehavior below for how this works.
   useDrag.watch(dragOn => {
     console.log({ dragOn })
     if (dragOn) {

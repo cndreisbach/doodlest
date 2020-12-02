@@ -1,10 +1,11 @@
 'use strict'
 
-// Import parts of electron to use
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const url = require('url')
 const fs = require('fs')
+const { setupMenu } = require('./app/menu')
+const { isMac } = require('./app/utils')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -31,12 +32,14 @@ function createWindow () {
     width: 1024, // width of the window
     height: 768, // height of the window
     show: false, // don't show until window is ready
-    title: 'Doodler',
+    title: 'Scribblest',
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true
     }
   })
+
+  const contents = mainWindow.webContents
 
   // and load the index.html of the app.
   let indexPath
@@ -57,6 +60,8 @@ function createWindow () {
       slashes: true
     })
   }
+
+  setupMenu(contents)
 
   // Load the index.html
   mainWindow.loadURL(indexPath)
@@ -89,7 +94,7 @@ app.on('ready', createWindow)
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
+  if (isMac) {
     app.quit()
   }
 })
