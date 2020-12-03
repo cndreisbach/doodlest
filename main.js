@@ -39,8 +39,6 @@ function createWindow () {
     }
   })
 
-  const contents = mainWindow.webContents
-
   // and load the index.html of the app.
   let indexPath
 
@@ -61,7 +59,7 @@ function createWindow () {
     })
   }
 
-  setupMenu(contents)
+  setupMenu(mainWindow.webContents)
 
   // Load the index.html
   mainWindow.loadURL(indexPath)
