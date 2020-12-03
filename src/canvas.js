@@ -1,6 +1,7 @@
 import { fabric } from 'fabric'
 import { penStore, toolStore, useDrag, toggleDrawingMode } from './stores'
 import { EraserBrush } from './eraser'
+import { snapCoords } from './math'
 
 export function createCanvas (canvasEl) {
   const canvas = new fabric.Canvas(canvasEl)
@@ -9,8 +10,7 @@ export function createCanvas (canvasEl) {
   function resizeCanvas () {
     const htmlEl = document.querySelector('html')
     canvas.setWidth(htmlEl.clientWidth)
-    const controlsEl = document.querySelector('.controls')
-    canvas.setHeight(htmlEl.clientHeight - controlsEl.clientHeight)
+    canvas.setHeight(htmlEl.clientHeight)
     canvas.calcOffset()
   }
 
@@ -47,9 +47,8 @@ export function createCanvas (canvasEl) {
   })
 
   // Handle drag events for infinite canvas.
-  // See addDragBehavior below for how this works.
+  // See addDragAndLineBehavior below for how this works.
   useDrag.watch(dragOn => {
-    console.log({ dragOn })
     if (dragOn) {
       canvas.isDrawingMode = false
       canvas.defaultCursor = 'move'
@@ -60,17 +59,16 @@ export function createCanvas (canvasEl) {
       canvas.setCursor('crosshair')
     }
   })
-  addDragBehavior(canvas)
-
   toggleDrawingMode.watch(mode => {
-    console.log({ drawingMode: mode })
     canvas.isDrawingMode = mode
   })
+
+  addDragAndLineBehavior(canvas, brushes)
 
   return canvas
 }
 
-function addDragBehavior (canvas) {
+function addDragAndLineBehavior (canvas, brushes) {
   canvas.on('mouse:down', function (opt) {
     const evt = opt.e
     if (evt.altKey === true) {
@@ -78,8 +76,22 @@ function addDragBehavior (canvas) {
       this.selection = false
       this.lastPosX = evt.clientX
       this.lastPosY = evt.clientY
+    } else if (evt.shiftKey === true) {
+      console.log('isLines')
+      this.isLines = true
+      this.selection = false
+      this.line = new fabric.Line([evt.clientX, evt.clientY, evt.clientX, evt.clientY], {
+        strokeWidth: brushes.pen.width,
+        stroke: brushes.pen.color,
+        fill: brushes.pen.color,
+        originX: 'center',
+        originY: 'center'
+      })
+      canvas.add(this.line)
+      console.log(this.line)
     }
   })
+
   canvas.on('mouse:move', function (opt) {
     if (this.isDragging) {
       const e = opt.e
@@ -89,6 +101,13 @@ function addDragBehavior (canvas) {
       this.requestRenderAll()
       this.lastPosX = e.clientX
       this.lastPosY = e.clientY
+    } else if (this.isLines && this.line) {
+      const evt = opt.e
+      const { x2, y2 } = snapCoords({
+        x1: this.line.x1, y1: this.line.y1, x2: evt.clientX, y2: evt.clientY, tolerance: 0.5
+      })
+      this.line.set({ x2, y2 })
+      canvas.renderAll()
     }
   })
   canvas.on('mouse:up', function (opt) {
@@ -97,5 +116,10 @@ function addDragBehavior (canvas) {
     this.setViewportTransform(this.viewportTransform)
     this.isDragging = false
     this.selection = true
+    this.isLines = false
+    if (this.line) {
+      this.line.setCoords()
+    }
+    this.line = null
   })
 }

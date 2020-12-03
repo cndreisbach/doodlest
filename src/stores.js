@@ -10,6 +10,7 @@ export const undoCanvasState = createEvent()
 export const redoCanvasState = createEvent()
 export const clearCanvas = createEvent()
 export const useDrag = createEvent()
+export const useLines = createEvent()
 export const toggleDrawingMode = createEvent()
 
 const MAX_UNDO = 10

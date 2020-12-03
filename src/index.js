@@ -10,17 +10,6 @@ import { ipcRenderer } from 'electron'
 
 document.title = 'Scribblest'
 
-const controlsEl = el('.controls')
-const dragButton = el('button#drag', el('i.icofont-drag.icofont-2x'))
-controlsEl.appendChild(dragButton)
-const penButton = el('button#pen', el('i.icofont-pencil-alt-2.icofont-2x'))
-penButton.addEventListener('click', () => setTool('pen'))
-controlsEl.appendChild(penButton)
-const eraserButton = el('button#eraser', el('i.icofont-eraser.icofont-2x'))
-eraserButton.addEventListener('click', () => setTool('eraser'))
-controlsEl.appendChild(eraserButton)
-mount(document.body, controlsEl)
-
 // Create a canvas and mount it
 const canvasEl = el('canvas#doodler')
 mount(document.body, canvasEl)
