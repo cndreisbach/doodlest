@@ -77,7 +77,6 @@ function addDragAndLineBehavior (canvas, brushes) {
       this.lastPosX = evt.clientX
       this.lastPosY = evt.clientY
     } else if (evt.shiftKey === true) {
-      console.log('isLines')
       this.isLines = true
       this.selection = false
       this.line = new fabric.Line([evt.clientX, evt.clientY, evt.clientX, evt.clientY], {
@@ -88,7 +87,6 @@ function addDragAndLineBehavior (canvas, brushes) {
         originY: 'center'
       })
       canvas.add(this.line)
-      console.log(this.line)
     }
   })
 

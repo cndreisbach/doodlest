@@ -28,6 +28,5 @@ export function snapCoords ({ x1, x2, y1, y2, tolerance }) {
   } else if (Math.abs(angle - 3) < tolerance) {
     x2 = x1
   }
-  console.log({ angle })
   return { x1, y1, x2, y2 }
 }
