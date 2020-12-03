@@ -104,7 +104,7 @@ function addDragAndLineBehavior (canvas, brushes) {
     } else if (this.isLines && this.line) {
       const evt = opt.e
       const { x2, y2 } = snapCoords({
-        x1: this.line.x1, y1: this.line.y1, x2: evt.clientX, y2: evt.clientY, tolerance: 0.5
+        x1: this.line.x1, y1: this.line.y1, x2: evt.clientX, y2: evt.clientY, tolerance: 0.1
       })
       this.line.set({ x2, y2 })
       canvas.renderAll()
