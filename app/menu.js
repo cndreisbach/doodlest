@@ -65,6 +65,12 @@ function setupMenu (contents) {
           }
         }
       ]
+    },
+    {
+      label: 'Developer',
+      submenu: [
+        { role: 'forcereload' }
+      ]
     }
   ]
 
