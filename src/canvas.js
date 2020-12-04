@@ -77,9 +77,15 @@ function addDragAndLineBehavior (canvas, brushes) {
       this.lastPosX = evt.clientX
       this.lastPosY = evt.clientY
     } else if (evt.shiftKey === true) {
+      // In order to make sure the line is drawn where our pointer is, we have to
+      // transform the MouseEvent's x and y coordinates with our canvas's viewport
+      // coordinates.
+      const vpt = this.viewportTransform
+      const x = evt.clientX - vpt[4]
+      const y = evt.clientY - vpt[5]
       this.isLines = true
       this.selection = false
-      this.line = new fabric.Line([evt.clientX, evt.clientY, evt.clientX, evt.clientY], {
+      this.line = new fabric.Line([x, y, x, y], {
         strokeWidth: brushes.pen.width,
         stroke: brushes.pen.color,
         fill: brushes.pen.color,
@@ -101,8 +107,14 @@ function addDragAndLineBehavior (canvas, brushes) {
       this.lastPosY = e.clientY
     } else if (this.isLines && this.line) {
       const evt = opt.e
+      // In order to make sure the line is drawn where our pointer is, we have to
+      // transform the MouseEvent's x and y coordinates with our canvas's viewport
+      // coordinates.
+      const vpt = this.viewportTransform
+      const evtX = evt.clientX - vpt[4]
+      const evtY = evt.clientY - vpt[5]
       const { x2, y2 } = snapCoords({
-        x1: this.line.x1, y1: this.line.y1, x2: evt.clientX, y2: evt.clientY, tolerance: 0.1
+        x1: this.line.x1, y1: this.line.y1, x2: evtX, y2: evtY, tolerance: 0.1
       })
       this.line.set({ x2, y2 })
       canvas.renderAll()
@@ -111,8 +123,10 @@ function addDragAndLineBehavior (canvas, brushes) {
   canvas.on('mouse:up', function (opt) {
   // on mouse up we want to recalculate new interaction
   // for all objects, so we call setViewportTransform
-    this.setViewportTransform(this.viewportTransform)
-    this.isDragging = false
+    if (this.isDragging) {
+      this.setViewportTransform(this.viewportTransform)
+      this.isDragging = false
+    }
     this.selection = true
     this.isLines = false
     if (this.line) {
