@@ -1,12 +1,10 @@
 'use strict'
 
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { format as formatUrl } from 'url'
-
-const path = require('path')
-const fs = require('fs')
-const { setupMenu } = require('./menu')
-const { isMac, isDevelopment } = require('./utils')
+import path from 'path'
+import { setupMenu } from './menu'
+import { isMac, isDevelopment } from './utils'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
