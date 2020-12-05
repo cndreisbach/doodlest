@@ -74,7 +74,6 @@ export function createCanvas (canvasEl) {
   })
 
   localForage.getItem('canvasState').then(canvasJSON => {
-    console.log({ canvasJSON })
     if (canvasJSON) {
       pauseSave = true
       canvas.loadFromJSON(canvasJSON, canvas.renderAll.bind(canvas))
