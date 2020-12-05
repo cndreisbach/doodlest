@@ -1,4 +1,6 @@
 import { fabric } from 'fabric'
+import localForage from 'localforage'
+
 import { penStore, toolStore, setTool, addCanvasState, undoStore, undoCanvasState, redoCanvasState, clearCanvas } from './stores'
 import Pen from './tools/pen'
 import Eraser from './tools/eraser'
@@ -22,12 +24,69 @@ export function createCanvas (canvasEl) {
   }
 
   window.addEventListener('resize', resizeCanvas)
+
   // Do an initial resize in order to make sure we start with a full-window
   // canvas.
   resizeCanvas()
 
   // Set canvas background to white.
   canvas.setBackgroundColor('#FFFFFF')
+
+  let pauseSave = false
+
+  canvas.on('object:added', () => {
+    if (!pauseSave) {
+      addCanvasState(canvas.toJSON())
+    }
+    localForage.setItem('canvasState', canvas.toJSON())
+  })
+
+  canvas.on('object:modified', () => {
+    if (!pauseSave) {
+      addCanvasState(canvas.toJSON())
+    }
+    localForage.setItem('canvasState', canvas.toJSON())
+  })
+
+  clearCanvas.watch(() => {
+    canvas.clear()
+    // We add the state post-clearing so that we can undo the clear.
+    addCanvasState(canvas.toJSON())
+    localForage.setItem('canvasState', canvas.toJSON())
+  })
+
+  undoStore.watch(undoCanvasState, state => {
+    pauseSave = true
+    const canvasState = state.canvasStates[state.index]
+    if (canvasState) {
+      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
+    }
+    pauseSave = false
+  })
+
+  undoStore.watch(redoCanvasState, state => {
+    pauseSave = true
+    const canvasState = state.canvasStates[state.index]
+    if (canvasState) {
+      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
+    }
+    pauseSave = false
+  })
+
+  localForage.getItem('canvasState').then(canvasJSON => {
+    console.log({ canvasJSON })
+    if (canvasJSON) {
+      pauseSave = true
+      canvas.loadFromJSON(canvasJSON, canvas.renderAll.bind(canvas))
+      pauseSave = false
+      // I have no insight on why, but if I do not call resizeCanvas here,
+      // the saved canvas will not display until I draw on it.
+      resizeCanvas()
+    }
+
+    // Add initial state
+    addCanvasState(canvas.toJSON())
+  })
 
   const tools = {
     pen: new Pen(canvas),
@@ -53,47 +112,6 @@ export function createCanvas (canvasEl) {
 
   // Initial tool is the pen
   setTool('pen')
-
-  let pauseSave = false
-
-  canvas.on('object:added', () => {
-    if (!pauseSave) {
-      addCanvasState(canvas.toJSON())
-    }
-  })
-
-  canvas.on('object:modified', () => {
-    if (!pauseSave) {
-      addCanvasState(canvas.toJSON())
-    }
-  })
-
-  undoStore.watch(undoCanvasState, state => {
-    pauseSave = true
-    const canvasState = state.canvasStates[state.index]
-    if (canvasState) {
-      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
-    }
-    pauseSave = false
-  })
-
-  undoStore.watch(redoCanvasState, state => {
-    pauseSave = true
-    const canvasState = state.canvasStates[state.index]
-    if (canvasState) {
-      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
-    }
-    pauseSave = false
-  })
-
-  clearCanvas.watch(() => {
-    canvas.clear()
-    // We add the state post-clearing so that we can undo the clear.
-    addCanvasState(canvas.toJSON())
-  })
-
-  // Add initial (blank) state
-  addCanvasState(canvas.toJSON())
 
   canvas.on('mouse:down', function (opt) {
     currentTool.onDown(opt)
