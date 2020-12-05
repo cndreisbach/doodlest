@@ -1,6 +1,7 @@
 import { createStore, createEvent } from 'effector'
 
 export const setTool = createEvent()
+export const lastTool = createEvent()
 export const selectPenColor = createEvent()
 export const incPenSize = createEvent()
 export const decPenSize = createEvent()
@@ -13,12 +14,32 @@ export const useDrag = createEvent()
 export const useLines = createEvent()
 export const toggleDrawingMode = createEvent()
 
-const MAX_UNDO = 10
+const MAX_UNDO = 20
 
-export const toolStore = createStore('pen')
-  .on(setTool, (state, payload) => payload)
+export const toolStore = createStore({ last: null, current: 'pen' })
+  .on(setTool, (state, payload) => ({ last: state.current, current: payload }))
+  .on(lastTool, (state) => {
+    const last = state.last || 'pen'
+    return { last: state.current, current: last }
+  })
 
-toolStore.watch(tool => console.log({ tool }))
+toolStore.watch(state => console.log(state))
+
+useDrag.watch(payload => {
+  if (payload) {
+    setTool('dragTool')
+  } else {
+    lastTool()
+  }
+})
+
+useLines.watch(payload => {
+  if (payload) {
+    setTool('lineTool')
+  } else {
+    lastTool()
+  }
+})
 
 export const penStore = createStore({
   color: '#222200',

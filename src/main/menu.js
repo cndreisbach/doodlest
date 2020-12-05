@@ -63,6 +63,22 @@ function setupMenu (contents) {
           click: function (menuItem, focusedWin) {
             contents.send('useTool', 'eraser')
           }
+        },
+        {
+          label: 'Drag Tool',
+          type: 'radio',
+          accelerator: 'D',
+          click: function (menuItem, focusedWin) {
+            contents.send('useTool', 'dragTool')
+          }
+        },
+        {
+          label: 'Line Tool',
+          type: 'radio',
+          accelerator: 'L',
+          click: function (menuItem, focusedWin) {
+            contents.send('useTool', 'lineTool')
+          }
         }
       ]
     },

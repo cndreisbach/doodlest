@@ -1,6 +1,7 @@
 import { fabric } from 'fabric'
+import BaseTool from './baseTool'
 
-export const EraserBrush = fabric.util.createClass(fabric.PencilBrush, {
+const EraserBrush = fabric.util.createClass(fabric.PencilBrush, {
 
   /**
    * On mouseup after drawing the path on contextTop canvas
@@ -45,3 +46,28 @@ export const EraserBrush = fabric.util.createClass(fabric.PencilBrush, {
     this._resetShadow()
   }
 })
+
+export default class Eraser extends BaseTool {
+  constructor (canvas) {
+    super()
+    this.canvas = canvas
+    this.brush = new EraserBrush(canvas)
+    this.brush.decimate = 2
+    this.brush.width = 10
+    this.brush.color = '#FFFFFF'
+  }
+
+  get width () {
+    return this.brush.width
+  }
+
+  set width (width) {
+    this.brush.width = width
+  }
+
+  onSelect () {
+    this.canvas.isDrawingMode = true
+    this.canvas.setCursor('crosshair')
+    this.canvas.freeDrawingBrush = this.brush
+  }
+}

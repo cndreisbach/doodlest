@@ -1,10 +1,17 @@
 import { fabric } from 'fabric'
-import { penStore, toolStore, useDrag, toggleDrawingMode } from './stores'
-import { EraserBrush } from './eraser'
-import { snapCoords } from './math'
+import { penStore, toolStore, setTool } from './stores'
+import Pen from './tools/pen'
+import Eraser from './tools/eraser'
+import DragTool from './tools/dragTool'
+import LineTool from './tools/lineTool'
 
 export function createCanvas (canvasEl) {
   const canvas = new fabric.Canvas(canvasEl)
+
+  // prevent selection of canvas elements
+  fabric.Object.prototype.selectable = false
+
+  let currentTool
 
   // Whenever the window size changes, resize the canvas to fill the window
   function resizeCanvas () {
@@ -22,116 +29,43 @@ export function createCanvas (canvasEl) {
   // Set canvas background to white.
   canvas.setBackgroundColor('#FFFFFF')
 
-  // Set up free drawing
-  canvas.isDrawingMode = true
-  const brushes = {
-    pen: new fabric.PencilBrush(canvas),
-    eraser: new EraserBrush(canvas)
+  const tools = {
+    pen: new Pen(canvas),
+    eraser: new Eraser(canvas),
+    dragTool: new DragTool(canvas),
+    lineTool: new LineTool(canvas)
   }
-  brushes.pen.decimate = 2
-  brushes.eraser.width = 10
-  brushes.eraser.color = '#FFFFFF'
-
-  // The initial drawing brush should be the pen.
-  canvas.freeDrawingBrush = brushes.pen
 
   // TODO
   // Set size for eraser and pen differently (or make same)
   // Allow for other tools
   penStore.watch(state => {
-    brushes.pen.width = state.size
-    brushes.pen.color = state.color
+    tools.pen.width = state.size
+    tools.pen.color = state.color
+    tools.lineTool.width = state.size
+    tools.lineTool.color = state.color
   })
+
   toolStore.watch(tool => {
-    canvas.freeDrawingBrush = brushes[tool]
+    currentTool = tools[tool.current]
+    console.log(tool.current, { currentTool })
+    currentTool.onSelect()
   })
 
-  // Handle drag events for infinite canvas.
-  // See addDragAndLineBehavior below for how this works.
-  useDrag.watch(dragOn => {
-    if (dragOn) {
-      canvas.isDrawingMode = false
-      canvas.defaultCursor = 'move'
-      canvas.setCursor('move')
-    } else {
-      canvas.isDrawingMode = true
-      canvas.defaultCursor = 'default'
-      canvas.setCursor('crosshair')
-    }
-  })
-  toggleDrawingMode.watch(mode => {
-    canvas.isDrawingMode = mode
-  })
+  // Initial tool is the pen
+  setTool('pen')
 
-  addDragAndLineBehavior(canvas, brushes)
-
-  return canvas
-}
-
-function addDragAndLineBehavior (canvas, brushes) {
   canvas.on('mouse:down', function (opt) {
-    const evt = opt.e
-    if (evt.altKey === true) {
-      this.isDragging = true
-      this.selection = false
-      this.lastPosX = evt.clientX
-      this.lastPosY = evt.clientY
-    } else if (evt.shiftKey === true) {
-      // In order to make sure the line is drawn where our pointer is, we have to
-      // transform the MouseEvent's x and y coordinates with our canvas's viewport
-      // coordinates.
-      const vpt = this.viewportTransform
-      const x = evt.clientX - vpt[4]
-      const y = evt.clientY - vpt[5]
-      this.isLines = true
-      this.selection = false
-      this.line = new fabric.Line([x, y, x, y], {
-        strokeWidth: brushes.pen.width,
-        stroke: brushes.pen.color,
-        fill: brushes.pen.color,
-        originX: 'center',
-        originY: 'center'
-      })
-      canvas.add(this.line)
-    }
+    currentTool.onDown(opt)
   })
 
   canvas.on('mouse:move', function (opt) {
-    if (this.isDragging) {
-      const e = opt.e
-      const vpt = this.viewportTransform
-      vpt[4] += e.clientX - this.lastPosX
-      vpt[5] += e.clientY - this.lastPosY
-      this.requestRenderAll()
-      this.lastPosX = e.clientX
-      this.lastPosY = e.clientY
-    } else if (this.isLines && this.line) {
-      const evt = opt.e
-      // In order to make sure the line is drawn where our pointer is, we have to
-      // transform the MouseEvent's x and y coordinates with our canvas's viewport
-      // coordinates.
-      const vpt = this.viewportTransform
-      const evtX = evt.clientX - vpt[4]
-      const evtY = evt.clientY - vpt[5]
-      const { x2, y2 } = snapCoords({
-        x1: this.line.x1, y1: this.line.y1, x2: evtX, y2: evtY, tolerance: 0.1
-      })
-      this.line.set({ x2, y2 })
-      canvas.renderAll()
-    }
+    currentTool.onMove(opt)
   })
+
   canvas.on('mouse:up', function (opt) {
-  // on mouse up we want to recalculate new interaction
-  // for all objects, so we call setViewportTransform
-    if (this.isDragging) {
-      this.setViewportTransform(this.viewportTransform)
-      this.isDragging = false
-    }
-    this.selection = true
-    this.isLines = false
-    if (this.line) {
-      this.line.setCoords()
-    }
-    this.line = null
+    currentTool.onUp(opt)
   })
+
+  return canvas
 }
