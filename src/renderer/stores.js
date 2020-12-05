@@ -23,8 +23,6 @@ export const toolStore = createStore({ last: null, current: 'pen' })
     return { last: state.current, current: last }
   })
 
-toolStore.watch(state => console.log(state))
-
 useDrag.watch(payload => {
   if (payload) {
     setTool('dragTool')

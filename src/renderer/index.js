@@ -1,5 +1,9 @@
+// The entry point for the JavaScript application that runs in the renderer.
+// Sets up the DOM, creates the Fabric.js canvas, listens for incoming messages
+// from the main thread, and adds the keybindings.
+
 import { el, mount } from 'redom'
-import { selectPenColor, addCanvasState, undoCanvasState, redoCanvasState, undoStore, clearCanvas, setTool } from './stores'
+import { selectPenColor, undoCanvasState, redoCanvasState, setTool } from './stores'
 import { setupKeyBindings } from './keybindings'
 import './assets/css/main.css'
 import './assets/icofont/icofont.css'
@@ -13,8 +17,7 @@ document.title = 'Scribblest'
 // Create a canvas and mount it
 const canvasEl = el('canvas#doodler')
 mount(document.body, canvasEl)
-
-const canvas = createCanvas(canvasEl)
+createCanvas(canvasEl)
 
 // Create color palette
 const colorChoices = [
@@ -45,51 +48,5 @@ ipcRenderer.on('useTool', (event, tool) => {
 ipcRenderer.on('undo', undoCanvasState)
 ipcRenderer.on('redo', redoCanvasState)
 
-let pauseSave = false
-
-canvas.on('object:added', () => {
-  if (!pauseSave) {
-    addCanvasState(canvas.toJSON())
-  }
-})
-
-canvas.on('object:modified', () => {
-  if (!pauseSave) {
-    addCanvasState(canvas.toJSON())
-  }
-})
-
-// Add initial (blank) state
-addCanvasState(canvas.toJSON())
-
-undoStore.watch(undoCanvasState, state => {
-  pauseSave = true
-  const canvasState = state.canvasStates[state.index]
-  if (canvasState) {
-    canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
-  }
-  pauseSave = false
-})
-
-undoStore.watch(redoCanvasState, state => {
-  pauseSave = true
-  const canvasState = state.canvasStates[state.index]
-  if (canvasState) {
-    canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
-  }
-  pauseSave = false
-})
-
-clearCanvas.watch(() => {
-  canvas.clear()
-  // We add the state post-clearing so that we can undo the clear.
-  addCanvasState(canvas.toJSON())
-})
-
-function saveAsSVG () {
-  ipcRenderer.send('save-file', canvas.toSVG())
-}
-
 // Keyboard
-
-setupKeyBindings({ save: saveAsSVG })
+setupKeyBindings()

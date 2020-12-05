@@ -1,5 +1,5 @@
 import { fabric } from 'fabric'
-import { penStore, toolStore, setTool } from './stores'
+import { penStore, toolStore, setTool, addCanvasState, undoStore, undoCanvasState, redoCanvasState, clearCanvas } from './stores'
 import Pen from './tools/pen'
 import Eraser from './tools/eraser'
 import DragTool from './tools/dragTool'
@@ -48,12 +48,52 @@ export function createCanvas (canvasEl) {
 
   toolStore.watch(tool => {
     currentTool = tools[tool.current]
-    console.log(tool.current, { currentTool })
     currentTool.onSelect()
   })
 
   // Initial tool is the pen
   setTool('pen')
+
+  let pauseSave = false
+
+  canvas.on('object:added', () => {
+    if (!pauseSave) {
+      addCanvasState(canvas.toJSON())
+    }
+  })
+
+  canvas.on('object:modified', () => {
+    if (!pauseSave) {
+      addCanvasState(canvas.toJSON())
+    }
+  })
+
+  undoStore.watch(undoCanvasState, state => {
+    pauseSave = true
+    const canvasState = state.canvasStates[state.index]
+    if (canvasState) {
+      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
+    }
+    pauseSave = false
+  })
+
+  undoStore.watch(redoCanvasState, state => {
+    pauseSave = true
+    const canvasState = state.canvasStates[state.index]
+    if (canvasState) {
+      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
+    }
+    pauseSave = false
+  })
+
+  clearCanvas.watch(() => {
+    canvas.clear()
+    // We add the state post-clearing so that we can undo the clear.
+    addCanvasState(canvas.toJSON())
+  })
+
+  // Add initial (blank) state
+  addCanvasState(canvas.toJSON())
 
   canvas.on('mouse:down', function (opt) {
     currentTool.onDown(opt)
