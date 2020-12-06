@@ -7,8 +7,6 @@ export default class Pen extends BaseTool {
     this.canvas = canvas
     this.brush = new fabric.PencilBrush(canvas)
     this.brush.decimate = 2
-    this.canvas.width = 4
-    this.canvas.color = '#000000'
   }
 
   get width () {

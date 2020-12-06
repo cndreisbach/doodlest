@@ -3,15 +3,16 @@
 // from the main thread, and adds the keybindings.
 
 import { el, mount } from 'redom'
-import { selectPenColor, undoCanvasState, redoCanvasState, setTool } from './stores'
-import { setupKeyBindings } from './keybindings'
-import './assets/css/main.css'
-import './assets/icofont/icofont.css'
-import { createCanvas } from './canvas'
 import { ipcRenderer } from 'electron'
 
-// Saving the canvas as SVG
+import { selectPenColor, undoCanvasState, redoCanvasState, setTool } from './stores'
+import { setupKeyBindings } from './keybindings'
+import { createCanvas } from './canvas'
 
+import './assets/css/main.css'
+import './assets/icofont/icofont.css'
+
+// Set the window title
 document.title = 'Scribblest'
 
 // Create a canvas and mount it
@@ -37,14 +38,10 @@ colorBoard.addEventListener('click', event => {
   selectPenColor(newColor)
 })
 
-// Tools
+// Handle messages from the main thread for changing tools, and undo/redo
 ipcRenderer.on('useTool', (event, tool) => {
   setTool(tool)
 })
-
-// Undo / redo
-// pauseSave is used b/c when we reload the canvas from JSON, a bunch of object:added events
-// fire. We do not want to capture those events.
 ipcRenderer.on('undo', undoCanvasState)
 ipcRenderer.on('redo', redoCanvasState)
 

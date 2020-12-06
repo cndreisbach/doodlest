@@ -32,6 +32,9 @@ export function createCanvas (canvasEl) {
   // Set canvas background to white.
   canvas.setBackgroundColor('#FFFFFF')
 
+  // Undo/redo
+  // pauseSave is used b/c when we reload the canvas from JSON, a bunch of
+  // object:added events fire. We do not want to capture those events.
   let pauseSave = false
 
   canvas.on('object:added', () => {
