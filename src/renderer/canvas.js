@@ -6,6 +6,7 @@ import Pen from './tools/pen'
 import Eraser from './tools/eraser'
 import DragTool from './tools/dragTool'
 import LineTool from './tools/lineTool'
+import Highlighter from './tools/highlighter'
 
 export function createCanvas (canvasEl) {
   const canvas = new fabric.Canvas(canvasEl)
@@ -94,8 +95,12 @@ export function createCanvas (canvasEl) {
     pen: new Pen(canvas),
     eraser: new Eraser(canvas),
     dragTool: new DragTool(canvas),
-    lineTool: new LineTool(canvas)
+    lineTool: new LineTool(canvas),
+    highlighter: new Highlighter(canvas)
   }
+
+  tools.highlighter.width = 32
+  tools.eraser.width = 8
 
   // TODO
   // Set size for eraser and pen differently (or make same)

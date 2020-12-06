@@ -92,6 +92,14 @@ export function setupMenu (contents) {
           click: function (menuItem, focusedWin) {
             contents.send('useTool', 'lineTool')
           }
+        },
+        {
+          label: 'Highlighter',
+          type: 'radio',
+          accelerator: 'H',
+          click: function (menuItem, focusedWin) {
+            contents.send('useTool', 'highlighter')
+          }
         }
       ]
     },
