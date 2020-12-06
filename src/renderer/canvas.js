@@ -127,5 +127,46 @@ export function createCanvas (canvasEl) {
     currentTool.onUp(opt)
   })
 
+  canvas.getFullSVG = function () {
+    canvas.discardActiveObject()
+    const sel = new fabric.ActiveSelection(canvas.getObjects(), {
+      canvas: canvas,
+      originX: 'left',
+      originY: 'top'
+    })
+    canvas.setActiveObject(sel)
+    const svg = canvas.toSVG({
+      viewBox: {
+        x: sel.left,
+        y: sel.top,
+        width: Math.ceil(sel.width),
+        height: Math.ceil(sel.height)
+      },
+      width: Math.ceil(sel.width),
+      height: Math.ceil(sel.height)
+    })
+    canvas.discardActiveObject()
+    return svg
+  }
+
+  canvas.getFullPNGDataUrl = function () {
+    canvas.discardActiveObject()
+    const sel = new fabric.ActiveSelection(canvas.getObjects(), {
+      canvas: canvas,
+      originX: 'left',
+      originY: 'top'
+    })
+    canvas.setActiveObject(sel)
+    const png = canvas.toDataURL({
+      format: 'png',
+      left: sel.left,
+      top: sel.top,
+      width: Math.ceil(sel.width),
+      height: Math.ceil(sel.height)
+    })
+    canvas.discardActiveObject()
+    return png
+  }
+
   return canvas
 }

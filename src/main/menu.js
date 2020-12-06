@@ -1,7 +1,7 @@
-const { app, Menu } = require('electron')
-const { isMac } = require('./utils')
+import { app, Menu } from 'electron'
+import { isMac } from './utils'
 
-function setupMenu (contents) {
+export function setupMenu (contents) {
   const menuTemplate = [
     ...(isMac
       ? [{
@@ -22,6 +22,19 @@ function setupMenu (contents) {
     {
       label: 'File',
       submenu: [
+        {
+          label: 'Export as SVG...',
+          click: function (menuItem, focusedWin) {
+            contents.send('export-svg')
+          }
+        },
+        {
+          label: 'Export as PNG...',
+          click: function (menuItem, focusedWin) {
+            contents.send('export-png')
+          }
+        },
+        { type: 'separator' },
         { role: 'quit' }
       ]
     },
@@ -93,4 +106,3 @@ function setupMenu (contents) {
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
 }
-exports.setupMenu = setupMenu

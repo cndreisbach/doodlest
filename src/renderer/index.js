@@ -18,7 +18,8 @@ document.title = 'Scribblest'
 // Create a canvas and mount it
 const canvasEl = el('canvas#doodler')
 mount(document.body, canvasEl)
-createCanvas(canvasEl)
+const canvas = createCanvas(canvasEl)
+window.canvas = canvas
 
 // Create color palette
 const colorChoices = [
@@ -44,6 +45,14 @@ ipcRenderer.on('useTool', (event, tool) => {
 })
 ipcRenderer.on('undo', undoCanvasState)
 ipcRenderer.on('redo', redoCanvasState)
+ipcRenderer.on('export-svg', () => {
+  console.log('export-svg')
+  ipcRenderer.send('export-svg', canvas.getFullSVG())
+})
+ipcRenderer.on('export-png', () => {
+  console.log('export-png')
+  ipcRenderer.send('export-png', canvas.getFullPNGDataUrl())
+})
 
 // Keyboard
 setupKeyBindings()

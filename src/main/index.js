@@ -1,10 +1,11 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { format as formatUrl } from 'url'
 import path from 'path'
 import { setupMenu } from './menu'
 import { isMac, isDevelopment } from './utils'
+import { exportPNG, exportSVG } from './saveAndExport'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -73,3 +74,6 @@ app.on('activate', () => {
 app.on('ready', () => {
   mainWindow = createMainWindow()
 })
+
+ipcMain.on('export-svg', exportSVG)
+ipcMain.on('export-png', exportPNG)
