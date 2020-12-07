@@ -18,11 +18,10 @@ function createMainWindow () {
   const window = mainWindow = new BrowserWindow({
     width: 1024, // width of the window
     height: 768, // height of the window
-    show: true, // don't show until window is ready
+    show: true,
     title: 'Scribblest',
     webPreferences: {
-      nodeIntegration: true,
-      enableRemoteModule: true
+      nodeIntegration: true
     }
   })
 
