@@ -24,6 +24,17 @@ export function createCanvas (canvasEl) {
     canvas.calcOffset()
   }
 
+  function resetCurrentToolUI () {
+    // Our custom cursors for tools are objects on the canvas. When the
+    // canvas is reloaded because of undo/redo or initial loading, or
+    // when the canvas is cleared, we need to deselect and reselect the
+    // current tool to make sure the cursor is visible.
+    if (currentTool) {
+      currentTool.onDeselect()
+      currentTool.onSelect()
+    }
+  }
+
   window.addEventListener('resize', resizeCanvas)
 
   // Do an initial resize in order to make sure we start with a full-window
@@ -38,14 +49,20 @@ export function createCanvas (canvasEl) {
   // object:added events fire. We do not want to capture those events.
   let pauseSave = false
 
-  canvas.on('object:added', () => {
+  canvas.on('object:added', ({ target }) => {
+    if (target.ui) {
+      return
+    }
     if (!pauseSave) {
       addCanvasState(canvas.toJSON())
     }
     localForage.setItem('canvasState', canvas.toJSON())
   })
 
-  canvas.on('object:modified', () => {
+  canvas.on('object:modified', ({ target }) => {
+    if (target.ui) {
+      return
+    }
     if (!pauseSave) {
       addCanvasState(canvas.toJSON())
     }
@@ -57,25 +74,20 @@ export function createCanvas (canvasEl) {
     // We add the state post-clearing so that we can undo the clear.
     addCanvasState(canvas.toJSON())
     localForage.setItem('canvasState', canvas.toJSON())
+    resetCurrentToolUI()
   })
 
-  undoStore.watch(undoCanvasState, state => {
+  function loadFromUndoRedo (undoState) {
     pauseSave = true
-    const canvasState = state.canvasStates[state.index]
+    const canvasState = undoState.canvasStates[undoState.index]
     if (canvasState) {
       canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
     }
     pauseSave = false
-  })
-
-  undoStore.watch(redoCanvasState, state => {
-    pauseSave = true
-    const canvasState = state.canvasStates[state.index]
-    if (canvasState) {
-      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
-    }
-    pauseSave = false
-  })
+    resetCurrentToolUI()
+  }
+  undoStore.watch(undoCanvasState, loadFromUndoRedo)
+  undoStore.watch(redoCanvasState, loadFromUndoRedo)
 
   localForage.getItem('canvasState').then(canvasJSON => {
     if (canvasJSON) {
@@ -85,6 +97,7 @@ export function createCanvas (canvasEl) {
       // I have no insight on why, but if I do not call resizeCanvas here,
       // the saved canvas will not display until I draw on it.
       resizeCanvas()
+      resetCurrentToolUI()
     }
 
     // Add initial state
@@ -113,6 +126,9 @@ export function createCanvas (canvasEl) {
   })
 
   toolStore.watch(tool => {
+    if (currentTool) {
+      currentTool.onDeselect()
+    }
     currentTool = tools[tool.current]
     currentTool.onSelect()
   })

@@ -33,7 +33,7 @@ const EraserBrush = fabric.util.createClass(fabric.PencilBrush, {
 
     // grab all the objects that intersects with the path
     const objects = this.canvas.getObjects().filter((obj) => {
-      if (!obj.intersectsWithObject(path)) return false
+      if (!obj.intersectsWithObject(path) || obj.ui) return false
       return true
     })
 
@@ -55,6 +55,18 @@ export default class Eraser extends BaseTool {
     this.brush.decimate = 2
     this.brush.width = 10
     this.brush.color = '#FFFFFF'
+    this.cursor = new fabric.Circle({
+      left: 0,
+      top: 0,
+      radius: (this.brush.width / 2) + 2,
+      fill: 'white',
+      stroke: 'black',
+      strokeWidth: 2,
+      originX: 'center',
+      originY: 'center',
+      excludeFromExport: true
+    })
+    this.cursor.ui = true
   }
 
   get width () {
@@ -63,11 +75,28 @@ export default class Eraser extends BaseTool {
 
   set width (width) {
     this.brush.width = width
+    this.cursor.set('radius', (width / 2) + 2)
+    this.canvas.renderAll()
   }
 
   onSelect () {
     this.canvas.isDrawingMode = true
     this.canvas.setCursor('crosshair')
     this.canvas.freeDrawingBrush = this.brush
+    this.canvas.add(this.cursor)
+    this.canvas.renderAll()
+  }
+
+  onDeselect () {
+    this.canvas.remove(this.cursor)
+    this.canvas.renderAll()
+  }
+
+  onMove ({ e }) {
+    this.cursor.top = e.layerY
+    this.cursor.left = e.layerX
+    this.cursor.bringToFront()
+    this.cursor.setCoords()
+    this.canvas.renderAll()
   }
 }

@@ -35,6 +35,17 @@ export default class Highlighter extends BaseTool {
     this.brush.width = 10
     this.brush.color = '#E9DF00' + ALPHA_HEX
     this._baseColor = '#E9DF00'
+
+    this.cursor = new fabric.Circle({
+      left: 0,
+      top: 0,
+      radius: (this.brush.width / 2) + 2,
+      fill: this.brush.color,
+      originX: 'center',
+      originY: 'center',
+      excludeFromExport: true
+    })
+    this.cursor.ui = true
   }
 
   get width () {
@@ -43,6 +54,8 @@ export default class Highlighter extends BaseTool {
 
   set width (width) {
     this.brush.width = width
+    this.cursor.set('radius', (width / 2) + 2)
+    this.canvas.renderAll()
   }
 
   get color () {
@@ -52,16 +65,42 @@ export default class Highlighter extends BaseTool {
   set color (color) {
     this._baseColor = color
     this.brush.color = color + ALPHA_HEX
+    this.cursor.set('fill', color + ALPHA_HEX)
+    this.canvas.renderAll()
   }
 
   onSelect () {
     this.canvas.isDrawingMode = true
-    this.canvas.setCursor('crosshair')
     this.canvas.freeDrawingBrush = this.brush
+    this.canvas.freeDrawingCursor = 'crosshair'
+    this.canvas.add(this.cursor)
+    this.canvas.renderAll()
     this.canvas.contextTop.globalAlpha = HIGHLIGHTER_ALPHA
   }
 
   onDeselect () {
     this.canvas.contextTop.globalAlpha = 1
+    this.canvas.remove(this.cursor)
+    this.canvas.renderAll()
+  }
+
+  onDown () {
+    this.cursor.set('visible', false)
+    this.canvas.renderAll()
+  }
+
+  onUp () {
+    this.cursor.set('visible', true)
+    this.canvas.renderAll()
+  }
+
+  onMove ({ e }) {
+    if (this.cursor.visible) {
+      this.cursor.top = e.layerY
+      this.cursor.left = e.layerX
+      this.cursor.bringToFront()
+      this.cursor.setCoords()
+      this.canvas.renderAll()
+    }
   }
 }
