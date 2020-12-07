@@ -19,6 +19,8 @@ document.title = 'Scribblest'
 const canvasEl = el('canvas#doodler')
 mount(document.body, canvasEl)
 const canvas = createCanvas(canvasEl)
+
+// Debugging purposes - can access canvas from devtools.
 window.canvas = canvas
 
 // Create color palette
@@ -46,11 +48,9 @@ ipcRenderer.on('useTool', (event, tool) => {
 ipcRenderer.on('undo', undoCanvasState)
 ipcRenderer.on('redo', redoCanvasState)
 ipcRenderer.on('export-svg', () => {
-  console.log('export-svg')
   ipcRenderer.send('export-svg', canvas.getFullSVG())
 })
 ipcRenderer.on('export-png', () => {
-  console.log('export-png')
   ipcRenderer.send('export-png', canvas.getFullPNGDataUrl())
 })
 

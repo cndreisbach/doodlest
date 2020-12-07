@@ -12,7 +12,6 @@ export const redoCanvasState = createEvent()
 export const clearCanvas = createEvent()
 export const useDrag = createEvent()
 export const useLines = createEvent()
-export const toggleDrawingMode = createEvent()
 
 const MAX_UNDO = 20
 
@@ -51,18 +50,18 @@ export const undoStore = createStore({
   index: 0,
   canvasStates: []
 })
-  .on(addCanvasState, (oldState, newCanvasState) => {
-    const newCanvasStates = oldState.canvasStates.slice(oldState.index)
+  .on(addCanvasState, (store, newCanvasState) => {
+    const newCanvasStates = store.canvasStates.slice(store.index)
     newCanvasStates.unshift(newCanvasState)
     return { index: 0, canvasStates: newCanvasStates.slice(0, MAX_UNDO) }
   })
-  .on(undoCanvasState, (oldState) => (
-    { ...oldState, index: Math.min(oldState.index + 1, oldState.canvasStates.length) }
+  .on(undoCanvasState, (store) => (
+    { ...store, index: Math.min(store.index + 1, store.canvasStates.length) }
   ))
-  .on(redoCanvasState, (oldState) => {
-    if (oldState.index > 0) {
-      return { ...oldState, index: oldState.index - 1 }
+  .on(redoCanvasState, (store) => {
+    if (store.index > 0) {
+      return { ...store, index: store.index - 1 }
     } else {
-      return oldState
+      return store
     }
   })
