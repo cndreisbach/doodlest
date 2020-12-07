@@ -6,7 +6,7 @@ import { homedir } from 'os'
 // Use the last directory saved to when saving a new file
 let lastDir = homedir()
 
-function createExport (ext, transformerFn = (contents) => contents) {
+function createExportFn (ext, transformerFn = (contents) => contents) {
   return function (event, contents) {
     dialog.showSaveDialog({
       title: 'Select the file path to save',
@@ -33,5 +33,5 @@ function createExport (ext, transformerFn = (contents) => contents) {
   }
 }
 
-export const exportSVG = createExport('svg')
-export const exportPNG = createExport('png', dataUrl => Buffer.from(dataUrl.split(',')[1], 'base64'))
+export const exportSVG = createExportFn('svg')
+export const exportPNG = createExportFn('png', dataUrl => Buffer.from(dataUrl.split(',')[1], 'base64'))
