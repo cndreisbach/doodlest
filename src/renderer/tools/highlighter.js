@@ -94,10 +94,10 @@ export default class Highlighter extends BaseTool {
     this.canvas.renderAll()
   }
 
-  onMove ({ e }) {
+  onMove ({ absolutePointer }) {
     if (this.cursor.visible) {
-      this.cursor.top = e.layerY
-      this.cursor.left = e.layerX
+      this.cursor.top = absolutePointer.y
+      this.cursor.left = absolutePointer.x
       this.cursor.bringToFront()
       this.cursor.setCoords()
       this.canvas.renderAll()

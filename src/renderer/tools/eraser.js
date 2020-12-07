@@ -92,9 +92,9 @@ export default class Eraser extends BaseTool {
     this.canvas.renderAll()
   }
 
-  onMove ({ e }) {
-    this.cursor.top = e.layerY
-    this.cursor.left = e.layerX
+  onMove ({ absolutePointer }) {
+    this.cursor.top = absolutePointer.y
+    this.cursor.left = absolutePointer.x
     this.cursor.bringToFront()
     this.cursor.setCoords()
     this.canvas.renderAll()
