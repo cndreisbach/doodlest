@@ -1,5 +1,5 @@
 import { el } from 'redom'
-import { toolStore, selectPenColor, setTool, penStore } from '../stores'
+import { toolStore, selectPenColor, setTool, penStore, incPenSize, decPenSize } from '../stores'
 
 // Create color palette
 const colorChoices = [
@@ -45,6 +45,17 @@ colorChoices.forEach(color => {
 
 const colorButtonGroup = el('.btn-group', [...colorButtons.values()])
 
+const increaseSizeBtn = el('button.btn.btn-default', [
+  el('i.icofont-plus.icofont-2x')
+])
+
+const decreaseSizeBtn = el('button.btn.btn-default', [
+  el('i.icofont-minus.icofont-2x')
+])
+
+increaseSizeBtn.addEventListener('click', incPenSize)
+decreaseSizeBtn.addEventListener('click', decPenSize)
+
 export const toolbar = el('header.toolbar.toolbar-header', [
   el('.toolbar-actions', [
     el('.btn-group', [
@@ -54,7 +65,10 @@ export const toolbar = el('header.toolbar.toolbar-header', [
       toolButtons.get('highlighter'),
       toolButtons.get('dragTool')
     ]),
-    colorButtonGroup
+    colorButtonGroup,
+    el('.btn-group', [
+      decreaseSizeBtn, increaseSizeBtn
+    ])
   ])
 ])
 
