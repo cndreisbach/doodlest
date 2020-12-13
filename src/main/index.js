@@ -21,6 +21,7 @@ function createMainWindow () {
     show: true,
     title: 'Scribblest',
     webPreferences: {
+      contextIsolation: false,
       nodeIntegration: true
     }
   })

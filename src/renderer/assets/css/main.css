@@ -46,3 +46,23 @@ canvas {
   outline: none;
   cursor: pointer;
 }
+
+.toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.color {
+  margin: 3px;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.active .color {
+  margin: 0;
+  width: calc(1.5em + 14px);
+  height: calc(1.5em + 12px);
+  margin: -3px -8px;
+}
