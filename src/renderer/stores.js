@@ -41,12 +41,13 @@ export const toolStore = createStore({
     size: 2
   },
   eraser: {
-    size: 8
+    size: 16
   },
   highlighter: {
     color: '#E9DF00',
-    size: 16
-  }
+    size: 32
+  },
+  dragTool: {}
 })
   .on(setTool, (state, payload) => ({ ...state, last: state.current, current: payload }))
   .on(lastTool, (state) => {
