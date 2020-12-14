@@ -1,11 +1,10 @@
 import { createStore, createEvent } from 'effector'
-
 export const setTool = createEvent()
 export const lastTool = createEvent()
+export const setToolColor = createEvent()
+export const incToolSize = createEvent()
+export const decToolSize = createEvent()
 export const selectPenColor = createEvent()
-export const incPenSize = createEvent()
-export const decPenSize = createEvent()
-export const setPenSize = createEvent()
 export const addCanvasState = createEvent()
 export const undoCanvasState = createEvent()
 export const redoCanvasState = createEvent()
@@ -15,12 +14,66 @@ export const useLines = createEvent()
 
 const MAX_UNDO = 20
 
-export const toolStore = createStore({ last: null, current: 'pen' })
-  .on(setTool, (state, payload) => ({ last: state.current, current: payload }))
+const syncPenAndLine = (state) => {
+  if (state.current === 'pen') {
+    return {
+      ...state,
+      lineTool: { ...state.pen }
+    }
+  } else if (state.current === 'lineTool') {
+    return {
+      ...state,
+      pen: { ...state.lineTool }
+    }
+  }
+  return state
+}
+
+export const toolStore = createStore({
+  last: null,
+  current: 'pen',
+  pen: {
+    color: '#222200',
+    size: 2
+  },
+  lineTool: {
+    color: '#222200',
+    size: 2
+  },
+  eraser: {
+    size: 8
+  },
+  highlighter: {
+    color: '#E9DF00',
+    size: 16
+  }
+})
+  .on(setTool, (state, payload) => ({ ...state, last: state.current, current: payload }))
   .on(lastTool, (state) => {
     const last = state.last || 'pen'
-    return { last: state.current, current: last }
+    return { ...state, last: state.current, current: last }
   })
+  .on(setToolColor, (state, payload) => syncPenAndLine({
+    ...state,
+    [state.current]: {
+      ...state[state.current],
+      color: payload
+    }
+  }))
+  .on(incToolSize, (state, payload) => syncPenAndLine({
+    ...state,
+    [state.current]: {
+      ...state[state.current],
+      size: Math.min(64, state[state.current].size * 2)
+    }
+  }))
+  .on(decToolSize, (state, payload) => syncPenAndLine({
+    ...state,
+    [state.current]: {
+      ...state[state.current],
+      size: Math.max(1, state[state.current].size / 2)
+    }
+  }))
 
 useDrag.watch(payload => {
   if (payload) {
@@ -37,14 +90,6 @@ useLines.watch(payload => {
     lastTool()
   }
 })
-
-export const penStore = createStore({
-  color: '#222200',
-  size: 2
-})
-  .on(selectPenColor, (state, payload) => ({ ...state, color: payload }))
-  .on(incPenSize, (state, payload) => ({ ...state, size: Math.min(64, state.size * 2) }))
-  .on(decPenSize, (state, payload) => ({ ...state, size: Math.max(1, state.size / 2) }))
 
 export const undoStore = createStore({
   index: 0,

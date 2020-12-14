@@ -1,7 +1,7 @@
 import { fabric } from 'fabric'
 import localForage from 'localforage'
 
-import { penStore, toolStore, setTool, addCanvasState, undoStore, undoCanvasState, redoCanvasState, clearCanvas } from './stores'
+import { toolStore, setTool, addCanvasState, undoStore, undoCanvasState, redoCanvasState, clearCanvas } from './stores'
 import Pen from './tools/pen'
 import Eraser from './tools/eraser'
 import DragTool from './tools/dragTool'
@@ -115,22 +115,18 @@ export function createCanvas (canvasEl) {
   tools.highlighter.width = 32
   tools.eraser.width = 8
 
-  // TODO
-  // Set size for eraser and pen differently (or make same)
-  // Allow for other tools
-  penStore.watch(state => {
-    tools.pen.width = state.size
-    tools.pen.color = state.color
-    tools.lineTool.width = state.size
-    tools.lineTool.color = state.color
-  })
-
-  toolStore.watch(tool => {
+  toolStore.watch(state => {
     if (currentTool) {
       currentTool.onDeselect()
     }
-    currentTool = tools[tool.current]
+    currentTool = tools[state.current]
     currentTool.onSelect()
+    if (state[state.current].color) {
+      currentTool.color = state[state.current].color
+    }
+    if (state[state.current].size) {
+      currentTool.width = state[state.current].size
+    }
   })
 
   // Initial tool is the pen

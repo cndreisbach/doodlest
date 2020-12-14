@@ -66,3 +66,20 @@ canvas {
   height: calc(1.5em + 12px);
   margin: -3px -8px;
 }
+
+.btn:disabled {
+  background-color: #ddd;
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0%, #bbbbbb),
+    color-stop(100%, #afafaf)
+  );
+  background-image: -webkit-linear-gradient(top, #bbbbbb 0%, #afafaf 100%);
+  background-image: linear-gradient(to bottom, #bbbbbb 0%, #afafaf 100%);
+}
+
+.btn:disabled .color {
+  opacity: 0.5;
+}

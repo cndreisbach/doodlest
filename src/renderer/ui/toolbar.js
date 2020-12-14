@@ -1,5 +1,5 @@
 import { el } from 'redom'
-import { toolStore, selectPenColor, setTool, penStore, incPenSize, decPenSize } from '../stores'
+import { toolStore, setToolColor, setTool, incToolSize, decToolSize } from '../stores'
 
 // Create color palette
 const colorChoices = [
@@ -53,8 +53,8 @@ const decreaseSizeBtn = el('button.btn.btn-default', [
   el('i.icofont-minus.icofont-2x')
 ])
 
-increaseSizeBtn.addEventListener('click', incPenSize)
-decreaseSizeBtn.addEventListener('click', decPenSize)
+increaseSizeBtn.addEventListener('click', incToolSize)
+decreaseSizeBtn.addEventListener('click', decToolSize)
 
 export const toolbar = el('header.toolbar.toolbar-header', [
   el('.toolbar-actions', [
@@ -78,7 +78,7 @@ toolButtons.forEach((button, tool) => {
 
 colorButtons.forEach((button, color) => {
   button.addEventListener('click', (e) => {
-    selectPenColor(color)
+    setToolColor(color)
   })
 })
 
@@ -87,11 +87,15 @@ toolStore.watch(state => {
     button.classList.remove('active')
   })
   toolButtons.get(state.current).classList.add('active')
-})
-
-penStore.watch(state => {
-  colorButtons.forEach(button => {
-    button.classList.remove('active')
-  })
-  colorButtons.get(state.color).classList.add('active')
+  if (state[state.current].color) {
+    colorButtons.forEach(button => {
+      button.disabled = false
+      button.classList.remove('active')
+    })
+    colorButtons.get(state[state.current].color).classList.add('active')
+  } else {
+    colorButtons.forEach(button => {
+      button.disabled = true
+    })
+  }
 })
