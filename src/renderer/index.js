@@ -7,7 +7,7 @@ import { ipcRenderer } from 'electron'
 
 import { undoCanvasState, redoCanvasState, setTool } from './stores'
 import { setupKeyBindings } from './keybindings'
-import { createCanvas } from './canvas'
+import { createCanvas } from './ui/canvas'
 import { toolbar } from './ui/toolbar'
 
 import './assets/css/main.css'

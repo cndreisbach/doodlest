@@ -1,12 +1,12 @@
 import { fabric } from 'fabric'
 import localForage from 'localforage'
 
-import { toolStore, setTool, addCanvasState, undoStore, undoCanvasState, redoCanvasState, clearCanvas } from './stores'
-import Pen from './tools/pen'
-import Eraser from './tools/eraser'
-import DragTool from './tools/dragTool'
-import LineTool from './tools/lineTool'
-import Highlighter from './tools/highlighter'
+import { toolStore, setTool, addCanvasState, undoStore, undoCanvasState, redoCanvasState, clearCanvas } from '../stores'
+import Pen from '../tools/pen'
+import Eraser from '../tools/eraser'
+import DragTool from '../tools/dragTool'
+import LineTool from '../tools/lineTool'
+import Highlighter from '../tools/highlighter'
 
 export function createCanvas (canvasEl) {
   const canvas = new fabric.Canvas(canvasEl)
