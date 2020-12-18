@@ -29,6 +29,7 @@ const canvas = createCanvas(canvasEl)
 // Debugging purposes - can access canvas from devtools.
 window.canvas = canvas
 
+// Mount other UI elements
 mount(containerEl, toolbar)
 
 // Handle messages from the main thread for changing tools, and undo/redo
@@ -37,6 +38,12 @@ ipcRenderer.on('useTool', (event, tool) => {
 })
 ipcRenderer.on('undo', undoCanvasState)
 ipcRenderer.on('redo', redoCanvasState)
+
+// The menus are created in the main thread, but we can only read from the
+// canvas in the renderer thread. Only the main thread can create a save file
+// dialog, so we send a message from the main thread to the renderer, export
+// the data from the canvas, then pass a message back to the main thread to
+// make the save dialog.
 ipcRenderer.on('export-svg', () => {
   ipcRenderer.send('export-svg', canvas.getFullSVG())
 })
