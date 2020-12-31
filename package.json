@@ -39,6 +39,13 @@
     "mac": {
       "icon": "build/icon.icns",
       "category": "public.app-category.graphics-design"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "draft",
+        "vPrefixedTagName": true
+      }
+    ]
   }
 }
