@@ -5,7 +5,7 @@
   "homepage": "./",
   "main": "src/main/index.js",
   "description": "Whiteboard app with an infinite canvas",
-  "repository": "https://github.com/cndreisbach/scribblest",
+  "repository": "https://github.com/cndreisbach/scribblest.git",
   "keywords": [],
   "author": "Clinton Dreisbach",
   "license": "MIT",
