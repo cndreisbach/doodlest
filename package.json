@@ -40,11 +40,13 @@
       "icon": "build/icon.icns",
       "category": "public.app-category.graphics-design"
     },
+    "linux": {
+      "target": "appImage"
+    },
     "publish": [
       {
         "provider": "github",
-        "releaseType": "draft",
-        "vPrefixedTagName": true
+        "url": "https://github.com/cndreisbach/scribblest.git"
       }
     ]
   }
