@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 14
       - run: yarn install
-      - run: yarn build --linux
+      - run: yarn build --linux -p onTagOrDraft
   build_macos:
     runs-on: macos-latest
     steps:
@@ -25,4 +25,4 @@ jobs:
         with:
           node-version: 14
       - run: yarn install
-      - run: yarn build
+      - run: yarn build --macos --win -p onTagOrDraft
