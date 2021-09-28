@@ -92,7 +92,7 @@ export function createCanvas(canvasEl) {
     pauseSave = true
     const canvasState = undoState.canvasStates[undoState.index]
     if (canvasState) {
-      canvas.loadFromJSON(canvasState, canvas.renderAll.bind(canvas))
+      canvas.loadFromJSON(canvasState, () => canvas.renderAll())
     }
     pauseSave = false
     resetCurrentToolUI()
@@ -103,7 +103,7 @@ export function createCanvas(canvasEl) {
   localForage.getItem("canvasState").then((canvasJSON) => {
     if (canvasJSON) {
       pauseSave = true
-      canvas.loadFromJSON(canvasJSON, canvas.renderAll.bind(canvas))
+      canvas.loadFromJSON(canvasJSON, () => canvas.renderAll())
       pauseSave = false
       // I have no insight on why, but if I do not call resizeCanvas here,
       // the saved canvas will not display until I draw on it.
