@@ -1,14 +1,22 @@
-import { fabric } from 'fabric'
-import localForage from 'localforage'
+import {
+  addCanvasState,
+  clearCanvas,
+  redoCanvasState,
+  setTool,
+  toolStore,
+  undoCanvasState,
+  undoStore,
+} from "../stores"
 
-import { toolStore, setTool, addCanvasState, undoStore, undoCanvasState, redoCanvasState, clearCanvas } from '../stores'
-import Pen from '../tools/pen'
-import Eraser from '../tools/eraser'
-import DragTool from '../tools/dragTool'
-import LineTool from '../tools/lineTool'
-import Highlighter from '../tools/highlighter'
+import DragTool from "../tools/dragTool"
+import Eraser from "../tools/eraser"
+import Highlighter from "../tools/highlighter"
+import LineTool from "../tools/lineTool"
+import Pen from "../tools/pen"
+import { fabric } from "fabric"
+import localForage from "localforage"
 
-export function createCanvas (canvasEl) {
+export function createCanvas(canvasEl) {
   const canvas = new fabric.Canvas(canvasEl)
 
   // prevent selection of canvas elements
@@ -17,14 +25,14 @@ export function createCanvas (canvasEl) {
   let currentTool
 
   // Whenever the window size changes, resize the canvas to fill the window
-  function resizeCanvas () {
-    const htmlEl = document.querySelector('html')
+  function resizeCanvas() {
+    const htmlEl = document.querySelector("html")
     canvas.setWidth(htmlEl.clientWidth)
     canvas.setHeight(htmlEl.clientHeight)
     canvas.calcOffset()
   }
 
-  function resetCurrentToolUI () {
+  function resetCurrentToolUI() {
     // Our custom cursors for tools are objects on the canvas. When the
     // canvas is reloaded because of undo/redo or initial loading, or
     // when the canvas is cleared, we need to deselect and reselect the
@@ -35,14 +43,14 @@ export function createCanvas (canvasEl) {
     }
   }
 
-  window.addEventListener('resize', resizeCanvas)
+  window.addEventListener("resize", resizeCanvas)
 
   // Do an initial resize in order to make sure we start with a full-window
   // canvas.
   resizeCanvas()
 
   // Set canvas background to white.
-  canvas.setBackgroundColor('#FFFFFF')
+  canvas.setBackgroundColor("#FFFFFF")
 
   // ## Undo/redo
   // pauseSave is used b/c when we reload the canvas from JSON, a bunch of
@@ -52,35 +60,35 @@ export function createCanvas (canvasEl) {
   // Whenever an object is added to the canvas or modified, we want to put it
   // into our undo/redo chain, and store it as the last state in the browser
   // so we can restore it after the app restarts.
-  canvas.on('object:added', ({ target }) => {
+  canvas.on("object:added", ({ target }) => {
     if (target.ui) {
       return
     }
     if (!pauseSave) {
       addCanvasState(canvas.toJSON())
     }
-    localForage.setItem('canvasState', canvas.toJSON())
+    localForage.setItem("canvasState", canvas.toJSON())
   })
 
-  canvas.on('object:modified', ({ target }) => {
+  canvas.on("object:modified", ({ target }) => {
     if (target.ui) {
       return
     }
     if (!pauseSave) {
       addCanvasState(canvas.toJSON())
     }
-    localForage.setItem('canvasState', canvas.toJSON())
+    localForage.setItem("canvasState", canvas.toJSON())
   })
 
   clearCanvas.watch(() => {
     canvas.clear()
     // We add the state post-clearing so that we can undo the clear.
     addCanvasState(canvas.toJSON())
-    localForage.setItem('canvasState', canvas.toJSON())
+    localForage.setItem("canvasState", canvas.toJSON())
     resetCurrentToolUI()
   })
 
-  function loadFromUndoRedo (undoState) {
+  function loadFromUndoRedo(undoState) {
     pauseSave = true
     const canvasState = undoState.canvasStates[undoState.index]
     if (canvasState) {
@@ -92,7 +100,7 @@ export function createCanvas (canvasEl) {
   undoStore.watch(undoCanvasState, loadFromUndoRedo)
   undoStore.watch(redoCanvasState, loadFromUndoRedo)
 
-  localForage.getItem('canvasState').then(canvasJSON => {
+  localForage.getItem("canvasState").then((canvasJSON) => {
     if (canvasJSON) {
       pauseSave = true
       canvas.loadFromJSON(canvasJSON, canvas.renderAll.bind(canvas))
@@ -112,13 +120,13 @@ export function createCanvas (canvasEl) {
     eraser: new Eraser(canvas),
     dragTool: new DragTool(canvas),
     lineTool: new LineTool(canvas),
-    highlighter: new Highlighter(canvas)
+    highlighter: new Highlighter(canvas),
   }
 
   tools.highlighter.width = 32
   tools.eraser.width = 8
 
-  toolStore.watch(state => {
+  toolStore.watch((state) => {
     if (currentTool) {
       currentTool.onDeselect()
     }
@@ -133,17 +141,17 @@ export function createCanvas (canvasEl) {
   })
 
   // Initial tool is the pen
-  setTool('pen')
+  setTool("pen")
 
-  canvas.on('mouse:down', function (opt) {
+  canvas.on("mouse:down", function (opt) {
     currentTool.onDown(opt)
   })
 
-  canvas.on('mouse:move', function (opt) {
+  canvas.on("mouse:move", function (opt) {
     currentTool.onMove(opt)
   })
 
-  canvas.on('mouse:up', function (opt) {
+  canvas.on("mouse:up", function (opt) {
     currentTool.onUp(opt)
   })
 
@@ -151,8 +159,8 @@ export function createCanvas (canvasEl) {
     canvas.discardActiveObject()
     const sel = new fabric.ActiveSelection(canvas.getObjects(), {
       canvas: canvas,
-      originX: 'left',
-      originY: 'top'
+      originX: "left",
+      originY: "top",
     })
     canvas.setActiveObject(sel)
     const svg = canvas.toSVG({
@@ -160,10 +168,10 @@ export function createCanvas (canvasEl) {
         x: sel.left,
         y: sel.top,
         width: Math.ceil(sel.width),
-        height: Math.ceil(sel.height)
+        height: Math.ceil(sel.height),
       },
       width: Math.ceil(sel.width),
-      height: Math.ceil(sel.height)
+      height: Math.ceil(sel.height),
     })
     canvas.discardActiveObject()
     return svg
@@ -173,16 +181,16 @@ export function createCanvas (canvasEl) {
     canvas.discardActiveObject()
     const sel = new fabric.ActiveSelection(canvas.getObjects(), {
       canvas: canvas,
-      originX: 'left',
-      originY: 'top'
+      originX: "left",
+      originY: "top",
     })
     canvas.setActiveObject(sel)
     const png = canvas.toDataURL({
-      format: 'png',
+      format: "png",
       left: sel.left,
       top: sel.top,
       width: Math.ceil(sel.width),
-      height: Math.ceil(sel.height)
+      height: Math.ceil(sel.height),
     })
     canvas.discardActiveObject()
     return png
